@@ -1,0 +1,73 @@
+---
+- name: Install gcsfuse and mount GCS bucket
+  hosts: all
+  become: true
+  vars:
+    bucket_name: "your-gcs-bucket-name"
+    mount_point: "/mnt/gcs-bucket"
+    gcsfuse_repo: "gcsfuse-{{ ansible_lsb.codename }}"
+
+  tasks:
+
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: yes
+
+    - name: Add gcsfuse apt repository
+      apt_repository:
+        repo: "deb https://packages.cloud.google.com/apt {{ gcsfuse_repo }} main"
+        state: present
+        filename: gcsfuse
+
+    - name: Add Google Cloud apt key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Install gcsfuse
+      apt:
+        name: gcsfuse
+        state: present
+        update_cache: yes
+
+    - name: Enable user_allow_other in fuse.conf
+      lineinfile:
+        path: /etc/fuse.conf
+        regexp: '^#?user_allow_other'
+        line: 'user_allow_other'
+
+    - name: Create mount directory
+      file:
+        path: "{{ mount_point }}"
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Add GCS bucket mount to /etc/fstab
+      lineinfile:
+        path: /etc/fstab
+        line: "{{ bucket_name }} {{ mount_point }} gcsfuse rw,implicit_dirs,uid=0,gid=0,file_mode=777,dir_mode=777,allow_other,_netdev 0 0"
+        state: present
+        create: yes
+
+    - name: Mount GCS bucket
+      mount:
+        path: "{{ mount_point }}"
+        src: "{{ bucket_name }}"
+        fstype: gcsfuse
+        opts: rw,implicit_dirs,uid=0,gid=0,file_mode=777,dir_mode=777,allow_other,_netdev
+        state: mounted
+
+    - name: Verify mount
+      command: mount
+      register: mount_output
+
+    - name: Show gcsfuse mount
+      debug:
+        msg: "{{ mount_output.stdout_lines | select('search', 'gcsfuse') | list }}"
