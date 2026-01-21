@@ -1,8 +1,14 @@
-# GCSFUSE Auto Mount Script 🚀
+# GCSFUSE Auto Mount 🚀
 
-This repository contains a **Bash script** to **install, configure, mount, and persist a Google Cloud Storage (GCS) bucket** on a Linux VM using **gcsfuse**.
+This repository contains **multiple implementations** to **install, configure, mount, and persist a Google Cloud Storage (GCS) bucket** on Linux systems using **gcsfuse**.
 
-The script ensures:
+Available implementations:
+
+* **Bash Script** (`mount-gcs.sh`) - Standalone shell script for direct execution
+* **Python Script** (`mount_gcs_bucket.py`) - Python 3 implementation with modular functions
+* **Ansible Playbook** (`mount_gcs_bucket.yml`) - Infrastructure-as-Code for multi-server deployments
+
+All implementations ensure:
 
 * Automatic installation of gcsfuse
 * Proper FUSE configuration
@@ -12,7 +18,103 @@ The script ensures:
 
 ---
 
-## 📌 Features
+## � Available Implementations
+
+Choose the implementation that best fits your workflow:
+
+### 1. **Bash Script** - `mount-gcs.sh`
+Best for: Single servers, direct execution, lightweight automation
+
+- **Pros**: No dependencies (only bash), fast execution, easy to customize
+- **Cons**: Not suitable for multi-server management
+- **Details**: See [README_mount-gcs.sh.md](README_mount-gcs.sh.md)
+
+### 2. **Python Script** - `mount_gcs_bucket.py`
+Best for: Python-based environments, programmatic integration, modular code
+
+- **Pros**: Clean Python code, easier to extend, good for Python projects
+- **Cons**: Requires Python 3 installation
+- **Details**: See [README_mount_gcs_bucket.py.md](README_mount_gcs_bucket.py.md)
+
+### 3. **Ansible Playbook** - `mount_gcs_bucket.yml`
+Best for: Multi-server deployments, infrastructure management, repeatable automation
+
+- **Pros**: Manage multiple servers, idempotent, part of IaC ecosystem
+- **Cons**: Requires Ansible installation and setup
+- **Details**: See [README_mount_gcs_bucket.yml.md](README_mount_gcs_bucket.yml.md)
+
+---
+
+## 🛠 Common Prerequisites
+
+All implementations require:
+
+* Linux OS (Ubuntu/Debian based)
+* Root or sudo privileges
+* Google Cloud SDK authentication already configured:
+
+  ```bash
+  gcloud auth application-default login
+  ```
+
+  OR the VM/server has a **Service Account** with:
+
+  * `Storage Object Viewer` / `Storage Object Admin`
+
+---
+
+## 📂 Configuration
+
+All implementations use the same configuration variables:
+
+```
+BUCKET_NAME="your-gcs-bucket-name"
+MOUNT_POINT="/mnt/gcs-bucket"
+```
+
+| Variable      | Description                                  |
+| ------------- | -------------------------------------------- |
+| `BUCKET_NAME` | Name of the GCS bucket                       |
+| `MOUNT_POINT` | Local directory where bucket will be mounted |
+
+Refer to the specific README file for your chosen implementation for detailed configuration instructions.
+
+---
+
+## ▶️ Quick Start
+
+Choose one of the following based on your needs:
+
+### Option 1: Bash Script (Simplest)
+
+```bash
+git clone https://github.com/mpandey95/gcsfuse-auto-mount.git
+cd gcsfuse-auto-mount
+chmod +x mount-gcs.sh
+sudo ./mount-gcs.sh
+```
+
+### Option 2: Python Script
+
+```bash
+git clone https://github.com/mpandey95/gcsfuse-auto-mount.git
+cd gcsfuse-auto-mount
+sudo python3 mount_gcs_bucket.py
+```
+
+### Option 3: Ansible Playbook
+
+```bash
+git clone https://github.com/mpandey95/gcsfuse-auto-mount.git
+cd gcsfuse-auto-mount
+ansible-playbook -i inventory mount_gcs_bucket.yml
+```
+
+For detailed usage instructions, see the specific README for your chosen implementation.
+
+---
+
+## �📌 Features
 
 * ✅ Installs **gcsfuse** automatically
 * ✅ Configures **FUSE** to allow non-root access
@@ -25,7 +127,7 @@ The script ensures:
 
 ## 🛠 Prerequisites
 
-Before running this script, ensure:
+Before running any implementation, ensure:
 
 * Linux OS (Ubuntu/Debian based)
 * Root or sudo privileges
@@ -43,9 +145,9 @@ Before running this script, ensure:
 
 ## 📂 Script Variables
 
-Update these variables at the top of the script:
+Update these variables in your chosen implementation:
 
-```bash
+```
 BUCKET_NAME="your-gcs-bucket-name"
 MOUNT_POINT="/mnt/gcs-bucket"
 ```
@@ -55,28 +157,21 @@ MOUNT_POINT="/mnt/gcs-bucket"
 | `BUCKET_NAME` | Name of the GCS bucket                       |
 | `MOUNT_POINT` | Local directory where bucket will be mounted |
 
+For specific configuration instructions, refer to the README file for your chosen implementation.
+
 ---
 
 ## ▶️ How to Use
 
-### 1️⃣ Clone the Repository
+1. **Choose your implementation**: Bash, Python, or Ansible
+2. **Read the specific README**: Each has detailed instructions
+3. **Update configuration**: Set `BUCKET_NAME` and `MOUNT_POINT`
+4. **Run the implementation**: Follow your chosen implementation's guide
 
-```bash
-git clone https://github.com/mpandey95/gcsfuse-auto-mount.git
-cd gcsfuse-auto-mount
-```
-
-### 2️⃣ Make Script Executable
-
-```bash
-chmod +x mount-gcs.sh
-```
-
-### 3️⃣ Run the Script
-
-```bash
-sudo ./mount-gcs.sh
-```
+See the implementation-specific README files for detailed step-by-step instructions:
+- [README_mount-gcs.sh.md](README_mount-gcs.sh.md) for Bash
+- [README_mount_gcs_bucket.py.md](README_mount_gcs_bucket.py.md) for Python
+- [README_mount_gcs_bucket.yml.md](README_mount_gcs_bucket.yml.md) for Ansible
 
 ---
 
