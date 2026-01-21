@@ -12,12 +12,21 @@ This shell script automates the complete setup process for mounting a GCS bucket
 - Persisting the mount configuration in `/etc/fstab`
 - Verifying the mount was successful
 
+## Supported Distributions
+
+The script supports both major Linux distribution families:
+
+- **Debian/Ubuntu**: Ubuntu, Debian
+- **RHEL/CentOS/Fedora**: RHEL 7+, CentOS 7+, Fedora
+
+The script automatically detects the OS and uses the appropriate package manager (`apt` for Debian/Ubuntu, `yum` for RHEL).
+
 ## Requirements
 
 - Bash shell
 - Root/sudo access
-- Linux system with apt package manager (Debian/Ubuntu-based)
-- curl and lsb-release utilities
+- Linux system (Debian/Ubuntu or RHEL/CentOS/Fedora based)
+- curl and package management tools
 - Valid GCS bucket name
 - Google Cloud credentials configured on the system
 
@@ -69,12 +78,27 @@ MOUNT_POINT="/mnt/gcs-bucket"         # Local mount directory
 
 The script is organized into clearly marked sections:
 
-1. **Installing gcsfuse** - Updates apt and installs dependencies
-2. **Configuring fuse** - Enables user_allow_other in /etc/fuse.conf
-3. **Creating mount directory** - Sets up mount point with proper ownership and permissions
-4. **Mounting GCS bucket** - Performs the actual mount with all necessary options
-5. **Persisting mount in /etc/fstab** - Adds/updates the fstab entry
-6. **Verifying mount** - Confirms successful mounting
+1. **OS Detection** - Detects the Linux distribution and version
+2. **Installing gcsfuse** - Uses apt for Debian/Ubuntu or yum for RHEL/CentOS/Fedora
+3. **Configuring fuse** - Enables user_allow_other in /etc/fuse.conf
+4. **Creating mount directory** - Sets up mount point with proper ownership and permissions
+5. **Mounting GCS bucket** - Performs the actual mount with all necessary options
+6. **Persisting mount in /etc/fstab** - Adds/updates the fstab entry
+7. **Verifying mount** - Confirms successful mounting
+
+## OS-Specific Package Installation
+
+### Ubuntu/Debian
+Uses `apt` package manager to install:
+- curl, gnupg, lsb-release
+- Adds Google Cloud apt repository
+- Installs gcsfuse
+
+### RHEL/CentOS/Fedora
+Uses `yum` package manager to install:
+- curl, gnupg
+- Adds Google Cloud yum repository configuration
+- Installs gcsfuse
 
 ## Error Handling
 
@@ -101,10 +125,84 @@ The script provides clear progress indicators:
 - Mount verification output
 - Success message: ✅ GCS bucket successfully mounted at /mnt/gcs-bucket
 
+## Environment Variables
+
+Override configuration via environment variables:
+
+```bash
+export BUCKET_NAME="my-gcs-bucket"
+export MOUNT_POINT="/data/gcs"
+sudo -E bash mount-gcs.sh
+```
+
+## Troubleshooting
+
+### Permission Denied
+
+```bash
+# Verify fuse.conf
+grep user_allow_other /etc/fuse.conf
+
+# If missing, add it manually
+sudo sed -i 's/#user_allow_other/user_allow_other/' /etc/fuse.conf
+```
+
+### Script Exits with Error
+
+Check the specific error message and review:
+
+```bash
+# Check system logs
+sudo journalctl -xe | grep -i mount
+
+# Verify GCS authentication
+gcloud auth application-default print-access-token
+```
+
+### Mount Not Persisting After Reboot
+
+```bash
+# Verify fstab entry
+grep gcsfuse /etc/fstab
+
+# Test fstab configuration
+sudo mount -a
+```
+
+## Uninstalling/Unmounting
+
+```bash
+# Unmount the bucket
+sudo umount /mnt/gcs-bucket
+
+# Remove from fstab (optional)
+sudo sed -i '/your-bucket-name/d' /etc/fstab
+
+# Uninstall gcsfuse (optional)
+sudo apt remove gcsfuse  # Debian/Ubuntu
+sudo yum remove gcsfuse   # RHEL/CentOS/Fedora
+```
+
+## Advanced Options
+
+Customize the mount command in the script:
+
+```bash
+gcsfuse \
+  --max-conns-per-host=100 \
+  --dir-mode=755 \
+  --file-mode=644 \
+  ${BUCKET_NAME} \
+  ${MOUNT_POINT}
+```
+
+See [gcsfuse documentation](https://github.com/GoogleCloudPlatform/gcsfuse) for all options.
+
 ## Notes
 
 - Must be run with sudo/root privileges
-- Designed for Debian/Ubuntu-based distributions
+- Designed for Debian/Ubuntu and RHEL/CentOS/Fedora distributions
+- Automatically detects the OS and uses appropriate package manager
 - Mount will persist across system reboots
-- Permissions allow full access to mounted bucket
 - Safe to run multiple times; fstab entry check prevents duplicates
+- Works on bare metal, VMs, containers, and cloud instances

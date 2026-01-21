@@ -12,11 +12,20 @@ This script automates the entire process of:
 - Persisting the mount configuration in `/etc/fstab`
 - Verifying the mount was successful
 
+## Supported Distributions
+
+The script supports both major Linux distribution families:
+
+- **Debian/Ubuntu**: Ubuntu, Debian
+- **RHEL/CentOS/Fedora**: RHEL 7+, CentOS 7+, Fedora
+
+The script automatically detects the OS and uses the appropriate package manager (`apt` for Debian/Ubuntu, `yum` for RHEL).
+
 ## Requirements
 
 - Python 3
 - Root/sudo access
-- Linux system with apt package manager (Debian/Ubuntu-based)
+- Linux system (Debian/Ubuntu or RHEL/CentOS/Fedora based)
 - Valid GCS bucket name
 - Proper Google Cloud credentials configured on the system
 
@@ -57,9 +66,105 @@ Edit these variables in the script to customize:
 ## Output
 
 The script provides visual feedback with:
+- OS and version detection at startup
 - ▶ prefix for each command being executed
 - ❌ error indicator if running without root privileges
 - Section headers showing progress through installation steps
+
+## Implementation Details
+
+### OS Detection
+The script reads `/etc/os-release` to detect the operating system:
+- Extracts OS ID and version information
+- Supports: ubuntu, debian, rhel, centos, fedora
+
+### Package Installation
+- **Debian/Ubuntu**: Uses `apt` package manager with Google Cloud apt repository
+- **RHEL/CentOS/Fedora**: Uses `yum` package manager with Google Cloud yum repository
+
+### Error Handling
+- Checks for root privileges before starting
+- Exits on unsupported OS
+- Fails fast on command errors
+
+## Environment Variables
+
+Override configuration via environment variables:
+
+```bash
+export BUCKET_NAME="my-bucket"
+export MOUNT_POINT="/data/gcs"
+sudo -E python3 mount_gcs_bucket.py
+```
+
+## Integration with Python Projects
+
+```python
+import subprocess
+import sys
+
+def mount_gcs_bucket(bucket_name, mount_point):
+    result = subprocess.run([
+        sys.executable, 'mount_gcs_bucket.py'
+    ], env={'BUCKET_NAME': bucket_name, 'MOUNT_POINT': mount_point})
+    return result.returncode == 0
+
+if __name__ == "__main__":
+    if mount_gcs_bucket("my-bucket", "/mnt/gcs"):
+        print("Mounting successful!")
+```
+
+## Troubleshooting
+
+### Python 3 Not Found
+
+```bash
+which python3
+sudo python3 --version
+
+# If not installed
+sudo apt install python3  # Debian/Ubuntu
+sudo yum install python3   # RHEL/CentOS
+```
+
+### Permission Denied
+
+```bash
+# Verify running with sudo
+if [ "$EUID" -eq 0 ]; then
+  echo "Running as root"
+fi
+
+# Check FUSE configuration
+sudo grep user_allow_other /etc/fuse.conf
+```
+
+### Unsupported OS Error
+
+The script only supports: ubuntu, debian, rhel, centos, fedora. Check your OS:
+
+```bash
+cat /etc/os-release | grep "^ID="
+```
+
+## Extending the Script
+
+Add custom functions to the script:
+
+```python
+def custom_mount_options():
+    """Add custom mount options"""
+    return "--max-conns-per-host=100 --enable-nonseekable"
+
+# Modify the gcsfuse command to include custom options
+```
+
+## Uninstalling
+
+```bash
+sudo umount /mnt/gcs-bucket
+sudo sed -i '/your-bucket/d' /etc/fstab
+```
 
 ## Notes
 
@@ -67,3 +172,5 @@ The script provides visual feedback with:
 - Permissions are set to 777 for both files and directories in the mount
 - The mount is configured with `_netdev` flag for network device handling
 - Mount will persist across reboots via `/etc/fstab` entry
+- Automatically detects and uses the appropriate package manager for your OS
+- Modular design allows easy integration into larger automation workflows

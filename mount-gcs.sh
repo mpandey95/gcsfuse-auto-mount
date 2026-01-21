@@ -4,19 +4,59 @@ set -e
 BUCKET_NAME="your-gcs-bucket-name" 
 MOUNT_POINT="/mnt/gcs-bucket"
 
+# Detect OS/Distribution
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS=$ID
+    VERSION=$VERSION_ID
+else
+    echo "❌ Cannot detect OS. /etc/os-release not found."
+    exit 1
+fi
+
+echo "=============================="
+echo " Detected OS: $OS (Version: $VERSION)"
+echo "=============================="
+
 echo "=============================="
 echo " Installing gcsfuse"
 echo "=============================="
 
-apt update
-apt install -y curl gnupg lsb-release
+if [ "$OS" = "ubuntu" ] || [ "$OS" = "debian" ]; then
+    # Ubuntu/Debian
+    apt update
+    apt install -y curl gnupg lsb-release
 
-export GCSFUSE_REPO=gcsfuse-$(lsb_release -c -s)
-echo "deb https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | tee /etc/apt/sources.list.d/gcsfuse.list
-curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+    export GCSFUSE_REPO=gcsfuse-$(lsb_release -c -s)
+    echo "deb https://packages.cloud.google.com/apt $GCSFUSE_REPO main" | tee /etc/apt/sources.list.d/gcsfuse.list
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
-apt update
-apt install -y gcsfuse
+    apt update
+    apt install -y gcsfuse
+
+elif [ "$OS" = "rhel" ] || [ "$OS" = "centos" ] || [ "$OS" = "fedora" ]; then
+    # RHEL/CentOS/Fedora
+    yum install -y curl gnupg
+
+    # Add Google Cloud repository
+    tee /etc/yum.repos.d/gcsfuse.repo > /dev/null <<EOF
+[gcsfuse]
+name=gcsfuse
+baseurl=https://packages.cloud.google.com/yum/repos/gcsfuse-el\$releasever-\$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOF
+
+    yum install -y gcsfuse
+
+else
+    echo "❌ Unsupported OS: $OS"
+    echo "Supported: ubuntu, debian, rhel, centos, fedora"
+    exit 1
+fi
 
 echo "=============================="
 echo " Configuring fuse"

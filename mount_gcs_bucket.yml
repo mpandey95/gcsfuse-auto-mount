@@ -5,11 +5,14 @@
   vars:
     bucket_name: "your-gcs-bucket-name"
     mount_point: "/mnt/gcs-bucket"
-    gcsfuse_repo: "gcsfuse-{{ ansible_lsb.codename }}"
 
   tasks:
 
-    - name: Install required packages
+    - name: Display detected OS family
+      debug:
+        msg: "Detected OS family: {{ ansible_os_family }}"
+
+    - name: Install required packages (Debian/Ubuntu)
       apt:
         name:
           - curl
@@ -17,23 +20,53 @@
           - lsb-release
         state: present
         update_cache: yes
+      when: ansible_os_family == "Debian"
 
-    - name: Add gcsfuse apt repository
+    - name: Install required packages (RHEL/CentOS/Fedora)
+      yum:
+        name:
+          - curl
+          - gnupg
+        state: present
+      when: ansible_os_family == "RedHat"
+
+    - name: Add gcsfuse apt repository (Debian/Ubuntu)
       apt_repository:
-        repo: "deb https://packages.cloud.google.com/apt {{ gcsfuse_repo }} main"
+        repo: "deb https://packages.cloud.google.com/apt gcsfuse-{{ ansible_lsb.codename }} main"
         state: present
         filename: gcsfuse
+      when: ansible_os_family == "Debian"
 
-    - name: Add Google Cloud apt key
+    - name: Add Google Cloud apt key (Debian/Ubuntu)
       apt_key:
         url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
         state: present
+      when: ansible_os_family == "Debian"
 
-    - name: Install gcsfuse
+    - name: Add gcsfuse yum repository (RHEL/CentOS/Fedora)
+      yum_repository:
+        name: gcsfuse
+        description: "gcsfuse (Google Cloud Storage FUSE adapter)"
+        baseurl: "https://packages.cloud.google.com/yum/repos/gcsfuse-el$releasever-$basearch"
+        gpgcheck: yes
+        repo_gpgcheck: yes
+        gpgkey:
+          - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+          - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+      when: ansible_os_family == "RedHat"
+
+    - name: Install gcsfuse (Debian/Ubuntu)
       apt:
         name: gcsfuse
         state: present
         update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install gcsfuse (RHEL/CentOS/Fedora)
+      yum:
+        name: gcsfuse
+        state: present
+      when: ansible_os_family == "RedHat"
 
     - name: Enable user_allow_other in fuse.conf
       lineinfile:

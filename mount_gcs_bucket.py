@@ -2,6 +2,7 @@
 import subprocess
 import sys
 import os
+import platform
 
 # ==============================
 # CONFIGURATION
@@ -21,16 +22,21 @@ def require_root():
         print("❌ This script must be run as root (use sudo).")
         sys.exit(1)
 
-# ==============================
-# MAIN LOGIC
-# ==============================
-def main():
-    require_root()
+def detect_os():
+    """Detect OS and distribution"""
+    with open('/etc/os-release', 'r') as f:
+        os_info = {}
+        for line in f:
+            key, value = line.rstrip().split("=", 1)
+            os_info[key] = value.strip('"')
+    
+    os_id = os_info.get('ID', '').lower()
+    version = os_info.get('VERSION_ID', '')
+    
+    return os_id, version
 
-    print("==============================")
-    print(" Installing gcsfuse")
-    print("==============================")
-
+def install_gcsfuse_debian():
+    """Install gcsfuse on Debian/Ubuntu"""
     run("apt update")
     run("apt install -y curl gnupg lsb-release")
 
@@ -46,6 +52,51 @@ def main():
     run("curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -")
     run("apt update")
     run("apt install -y gcsfuse")
+
+def install_gcsfuse_rhel():
+    """Install gcsfuse on RHEL/CentOS/Fedora"""
+    run("yum install -y curl gnupg")
+
+    # Create gcsfuse repository configuration
+    gcsfuse_repo = """[gcsfuse]
+name=gcsfuse
+baseurl=https://packages.cloud.google.com/yum/repos/gcsfuse-el$releasever-$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+"""
+    
+    with open('/etc/yum.repos.d/gcsfuse.repo', 'w') as f:
+        f.write(gcsfuse_repo)
+    
+    run("yum install -y gcsfuse")
+
+# ==============================
+# MAIN LOGIC
+# ==============================
+def main():
+    require_root()
+
+    # Detect OS
+    os_id, version = detect_os()
+    print("==============================")
+    print(f" Detected OS: {os_id} (Version: {version})")
+    print("==============================")
+
+    print("==============================")
+    print(" Installing gcsfuse")
+    print("==============================")
+
+    if os_id in ['ubuntu', 'debian']:
+        install_gcsfuse_debian()
+    elif os_id in ['rhel', 'centos', 'fedora']:
+        install_gcsfuse_rhel()
+    else:
+        print(f"❌ Unsupported OS: {os_id}")
+        print("Supported: ubuntu, debian, rhel, centos, fedora")
+        sys.exit(1)
 
     print("==============================")
     print(" Configuring fuse")
