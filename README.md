@@ -32,7 +32,7 @@ Automated solutions to install, configure, and mount Google Cloud Storage bucket
 
 #### ☁️ Cloud & Platforms
 ![GCP](https://img.shields.io/badge/GCP-Expert-blue?style=flat-square&logo=google-cloud)
-![AWS](https://img.shields.io/badge/AWS-Advanced-orange?style=flat-square&logo=amazon-aws)
+![AWS](https://img.shields.io/badge/AWS-Expert-FF9900?style=flat-square&logo=amazon-aws)
 
 #### ⚙️ Platform & DevOps
 ![Kubernetes](https://img.shields.io/badge/Kubernetes-Expert-blue?style=flat-square&logo=kubernetes)
@@ -52,10 +52,10 @@ Automated solutions to install, configure, and mount Google Cloud Storage bucket
 ![Python](https://img.shields.io/badge/Python-Expert-3776AB?style=flat-square&logo=python)
 ![Bash](https://img.shields.io/badge/Bash-Expert-4EAA25?style=flat-square&logo=gnu-bash)
 ![YAML](https://img.shields.io/badge/YAML-Advanced-CB171E?style=flat-square)
-![Go](https://img.shields.io/badge/Go-Advanced-00ADD8?style=flat-square&logo=go)
+
 
 #### 💾 Database
-![SQL](https://img.shields.io/badge/SQL-Expert-CC2927?style=flat-square&logo=mysql)
+![SQL](https://img.shields.io/badge/SQL-Advanced-CC2927?style=flat-square&logo=mysql)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Advanced-13AA52?style=flat-square&logo=mongodb)
 
 ## Connect With Me
