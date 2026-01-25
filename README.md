@@ -49,8 +49,8 @@ Automated solutions to install, configure, and mount Google Cloud Storage bucket
 ![Secrets Management](https://img.shields.io/badge/Secrets%20Mgmt-Advanced-yellow?style=flat-square&logo=vault)
 
 #### 🧑‍💻 Programming
-![Python](https://img.shields.io/badge/Python-Expert-3776AB?style=flat-square&logo=python)
-![Bash](https://img.shields.io/badge/Bash-Expert-4EAA25?style=flat-square&logo=gnu-bash)
+![Python](https://img.shields.io/badge/Python-Advanced-3776AB?style=flat-square&logo=python)
+![Bash](https://img.shields.io/badge/Bash-Advanced-4EAA25?style=flat-square&logo=gnu-bash)
 ![YAML](https://img.shields.io/badge/YAML-Advanced-CB171E?style=flat-square)
 
 
