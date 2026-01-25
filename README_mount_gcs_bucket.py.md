@@ -1,103 +1,38 @@
 # mount_gcs_bucket.py
 
-A Python 3 script for installing and configuring gcsfuse to mount a Google Cloud Storage (GCS) bucket on Linux systems.
-
-## Purpose
-
-This script automates the entire process of:
-- Installing gcsfuse and its dependencies
-- Configuring FUSE filesystem permissions
-- Creating a mount directory
-- Mounting a GCS bucket
-- Persisting the mount configuration in `/etc/fstab`
-- Verifying the mount was successful
-
-## Supported Distributions
-
-The script supports both major Linux distribution families:
-
-- **Debian/Ubuntu**: Ubuntu, Debian
-- **RHEL/CentOS/Fedora**: RHEL 7+, CentOS 7+, Fedora
-
-The script automatically detects the OS and uses the appropriate package manager (`apt` for Debian/Ubuntu, `yum` for RHEL).
+**Python 3 script** automating GCS bucket mounting on Linux (Debian/Ubuntu/RHEL/CentOS/Fedora).
 
 ## Requirements
+- Python 3, Root/sudo, Valid GCS credentials
 
-- Python 3
-- Root/sudo access
-- Linux system (Debian/Ubuntu or RHEL/CentOS/Fedora based)
-- Valid GCS bucket name
-- Proper Google Cloud credentials configured on the system
-
-## Usage
-
-### Prerequisites
-
-Before running the script, update the configuration variables at the top of the file:
-
+## Configuration
 ```python
-BUCKET_NAME = "your-gcs-bucket-name"
+BUCKET_NAME = "your-bucket"
 MOUNT_POINT = "/mnt/gcs-bucket"
 ```
 
-### Running the Script
-
+## Usage
 ```bash
 sudo python3 mount_gcs_bucket.py
 ```
 
-The script requires root privileges and will:
-1. Install curl, gnupg, and lsb-release packages
-2. Add the official gcsfuse repository for your distribution
+**Automates:**
+1. Install curl, gnupg, lsb-release
+2. Add gcsfuse repo (apt/yum)
 3. Install gcsfuse
-4. Enable FUSE user_allow_other configuration
-5. Create and set permissions on the mount directory
-6. Mount the GCS bucket with appropriate permissions
-7. Add the mount to `/etc/fstab` for persistence
-8. Verify the successful mount
+4. Enable FUSE config
+5. Create mount directory
+6. Mount GCS bucket
+7. Persist in /etc/fstab
+8. Verify mount
 
-## Configuration
+## Features
+- **OS Detection**: Auto-detects Debian/RHEL families
+- **Package Manager**: Uses apt (Debian) or yum (RHEL)
+- **Error Handling**: Root privilege checks, unsupported OS detection
+- **Environment Variables**: `export BUCKET_NAME="bucket" && sudo -E python3 mount_gcs_bucket.py`
 
-Edit these variables in the script to customize:
-
-- `BUCKET_NAME`: The name of your GCS bucket to mount
-- `MOUNT_POINT`: The local directory where the bucket will be mounted
-
-## Output
-
-The script provides visual feedback with:
-- OS and version detection at startup
-- ▶ prefix for each command being executed
-- ❌ error indicator if running without root privileges
-- Section headers showing progress through installation steps
-
-## Implementation Details
-
-### OS Detection
-The script reads `/etc/os-release` to detect the operating system:
-- Extracts OS ID and version information
-- Supports: ubuntu, debian, rhel, centos, fedora
-
-### Package Installation
-- **Debian/Ubuntu**: Uses `apt` package manager with Google Cloud apt repository
-- **RHEL/CentOS/Fedora**: Uses `yum` package manager with Google Cloud yum repository
-
-### Error Handling
-- Checks for root privileges before starting
-- Exits on unsupported OS
-- Fails fast on command errors
-
-## Environment Variables
-
-Override configuration via environment variables:
-
-```bash
-export BUCKET_NAME="my-bucket"
-export MOUNT_POINT="/data/gcs"
-sudo -E python3 mount_gcs_bucket.py
-```
-
-## Integration with Python Projects
+**Support:** [GitHub](https://github.com/mpandey95) | [LinkedIn](https://linkedin.com/in/manish-pandey95)
 
 ```python
 import subprocess

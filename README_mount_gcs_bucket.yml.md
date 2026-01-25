@@ -1,102 +1,46 @@
 # mount_gcs_bucket.yml
 
-An Ansible playbook for installing and configuring gcsfuse to mount a Google Cloud Storage (GCS) bucket on remote Linux systems.
-
-## Purpose
-
-This Ansible playbook automates the deployment and configuration of gcsfuse across one or more servers by:
-- Installing required dependencies
-- Adding the gcsfuse apt/yum repository
-- Installing gcsfuse package
-- Configuring FUSE filesystem permissions
-- Creating the mount directory with proper permissions
-- Adding the mount configuration to `/etc/fstab`
-- Mounting the GCS bucket with appropriate options
-- Verifying the mount was successful
-
-## Supported Distributions
-
-The playbook supports both major Linux distribution families:
-
-- **Debian/Ubuntu**: Ubuntu, Debian
-- **RHEL/CentOS/Fedora**: RHEL 7+, CentOS 7+, Fedora
-
-The playbook automatically detects the OS family (`ansible_os_family`) and uses conditional tasks to apply the correct package manager and configuration.
+**Ansible playbook** for multi-server GCS bucket mounting on Debian/Ubuntu/RHEL/CentOS/Fedora.
 
 ## Requirements
+- Ansible control machine
+- SSH access to targets with sudo
+- Debian/Ubuntu or RHEL systems
+- Valid GCS credentials
 
-- Ansible installed on the control machine
-- Target hosts must be Debian/Ubuntu or RHEL/CentOS/Fedora based systems
-- SSH access to target hosts with sudo privileges
-- Valid GCS bucket name
-- Google Cloud credentials configured on target systems
-
-## Usage
-
-### Prerequisites
-
-Update the variables in the playbook for your environment:
-
+## Configuration
 ```yaml
 vars:
-    bucket_name: "your-gcs-bucket-name"
-    mount_point: "/mnt/gcs-bucket"
+  bucket_name: "your-bucket"
+  mount_point: "/mnt/gcs-bucket"
 ```
 
-### Running the Playbook
-
+## Usage
 ```bash
 ansible-playbook -i inventory mount_gcs_bucket.yml
-```
-
-Or target specific hosts:
-
-```bash
+# Or specific hosts:
 ansible-playbook -i inventory mount_gcs_bucket.yml -l hostname
 ```
 
-## Configuration
+## What it does
+1. Detect OS family (Debian/RedHat)
+2. Install curl, gnupg, lsb-release (Debian) or curl, gnupg (RedHat)
+3. Add gcsfuse apt/yum repo
+4. Install gcsfuse
+5. Enable FUSE user_allow_other
+6. Create mount directory
+7. Add mount to /etc/fstab
+8. Mount GCS bucket
+9. Verify mount
 
-Edit these variables in the playbook to customize:
+## Features
+- **Conditional tasks**: OS-family detection with Ansible `when` conditions
+- **Package managers**: Apt for Debian/Ubuntu, yum for RHEL
+- **Multi-server**: Deploy to multiple hosts simultaneously
+- **Idempotent**: Safely re-run without issues
+- **Repo auto-derivation**: gcsfuse_repo from LSB codename
 
-- `bucket_name`: The name of your GCS bucket to mount
-- `mount_point`: The local directory where the bucket will be mounted on target systems
-- `gcsfuse_repo`: Automatically derived from the system's LSB codename (e.g., focal, jammy)
-
-## Playbook Tasks
-
-The playbook includes the following tasks:
-
-1. **Display detected OS family** - Shows the detected OS for verification
-2. **Install required packages (Debian/Ubuntu)** - Installs curl, gnupg, lsb-release
-3. **Install required packages (RHEL/CentOS/Fedora)** - Installs curl, gnupg
-4. **Add gcsfuse apt repository (Debian/Ubuntu)** - Configures Google Cloud apt repository
-5. **Add Google Cloud apt key (Debian/Ubuntu)** - Adds GPG key for package verification
-6. **Add gcsfuse yum repository (RHEL/CentOS/Fedora)** - Configures Google Cloud yum repository
-7. **Install gcsfuse (Debian/Ubuntu)** - Installs gcsfuse package via apt
-8. **Install gcsfuse (RHEL/CentOS/Fedora)** - Installs gcsfuse package via yum
-9. **Enable user_allow_other** - Modifies `/etc/fuse.conf` to allow non-root users
-10. **Create mount directory** - Creates mount point with 755 permissions
-11. **Add GCS bucket mount to /etc/fstab** - Ensures mount persists across reboots
-12. **Mount GCS bucket** - Performs the actual mount operation
-13. **Verify mount** - Confirms successful mounting
-14. **Show gcsfuse mount** - Displays mount verification output
-
-## Conditional Execution
-
-The playbook uses Ansible's `when` conditions to execute OS-specific tasks:
-
-- Tasks with `when: ansible_os_family == "Debian"` run on Ubuntu/Debian systems
-- Tasks with `when: ansible_os_family == "RedHat"` run on RHEL/CentOS/Fedora systems
-
-This ensures only the appropriate commands are executed for each system type.
-
-## Package Manager Support
-
-- **Debian/Ubuntu**: Uses `apt` module for package management
-- **RHEL/CentOS/Fedora**: Uses `yum` module for package management and `yum_repository` for repository configuration
-
-## Privileges
+**Support:** [GitHub](https://github.com/mpandey95) | [LinkedIn](https://linkedin.com/in/manish-pandey95)
 
 The playbook runs with `become: true`, requiring sudo access on target hosts. Ensure your Ansible user can execute sudo commands without a password, or provide the `--ask-become-pass` flag.
 

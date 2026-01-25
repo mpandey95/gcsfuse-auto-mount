@@ -1,102 +1,55 @@
 # gcsfuse_mount.go
 
-A Go program for installing and configuring gcsfuse to mount a Google Cloud Storage (GCS) bucket on Linux systems.
-
-## Purpose
-
-This Go program automates the complete setup process for mounting a GCS bucket by:
-- Installing gcsfuse and required dependencies
-- Configuring FUSE filesystem permissions
-- Creating a mount directory with appropriate permissions
-- Mounting the GCS bucket with specified options
-- Persisting the mount configuration in `/etc/fstab`
-- Verifying the mount was successful
-
-## Supported Distributions
-
-The program supports both major Linux distribution families:
-
-- **Debian/Ubuntu**: Ubuntu, Debian
-- **RHEL/CentOS/Fedora**: RHEL 7+, CentOS 7+, Fedora
-
-The program automatically detects the OS and uses the appropriate package manager (`apt` for Debian/Ubuntu, `yum` for RHEL).
+**Go program** for high-performance GCS bucket mounting on Linux (Debian/Ubuntu/RHEL/CentOS/Fedora).
 
 ## Requirements
+- Go 1.16+ (for building only)
+- sudo access
+- Valid GCS credentials
 
-- Go 1.16 or higher (for building the program)
-- Root/sudo access
-- Linux system (Debian/Ubuntu or RHEL/CentOS/Fedora based)
-- Valid GCS bucket name
-- Google Cloud credentials configured on the system
-
-## Building
-
-### Option 1: Using `go build` (Recommended)
-
+## Build
 ```bash
+# Build executable
 go build -o gcsfuse_mount gcsfuse_mount.go
-```
 
-### Option 2: Using `go run` (Direct execution)
-
-```bash
-sudo go run gcsfuse_mount.go
-```
-
-### Option 3: Cross-compilation
-
-Build for a different architecture:
-
-```bash
-# Build for Linux ARM64
+# Cross-compile (ARM64, 386)
 GOOS=linux GOARCH=arm64 go build -o gcsfuse_mount gcsfuse_mount.go
-
-# Build for Linux 386
-GOOS=linux GOARCH=386 go build -o gcsfuse_mount gcsfuse_mount.go
 ```
 
-## Usage
-
-### Prerequisites
-
-Before running the program, update the configuration constants in the source code:
-
+## Configuration
 ```go
 const (
-	BucketName = "your-gcs-bucket-name"
-	MountPoint = "/mnt/gcs-bucket"
+  BucketName = "your-bucket"
+  MountPoint = "/mnt/gcs-bucket"
 )
 ```
 
-### Running the Program
-
-After building:
-
+## Usage
 ```bash
 sudo ./gcsfuse_mount
-```
-
-Or run directly with Go:
-
-```bash
+# Or direct:
 sudo go run gcsfuse_mount.go
 ```
 
-The program will:
-1. Verify root/sudo privileges
-2. Detect the operating system
-3. Install curl, gnupg, and other required packages
-4. Add the official gcsfuse repository for your distribution
+**Automates:**
+1. Verify sudo privileges
+2. Detect OS (apt vs yum)
+3. Install curl, gnupg
+4. Add gcsfuse repo
 5. Install gcsfuse
-6. Enable FUSE user_allow_other configuration
-7. Create and set permissions on the mount directory
-8. Mount the GCS bucket with appropriate permissions
-9. Add the mount to `/etc/fstab` for persistence
-10. Verify the successful mount
+6. Enable FUSE config
+7. Create mount directory
+8. Mount GCS bucket
+9. Add to /etc/fstab
+10. Verify mount
 
-## Configuration
+**Advantages:**
+- Single compiled executable (no runtime dependencies)
+- Fast execution, production-ready
+- Cross-platform compilation support
+- Best for Kubernetes/containerization
 
-Edit these constants in the source code to customize:
+**Support:** [GitHub](https://github.com/mpandey95) | [LinkedIn](https://linkedin.com/in/manish-pandey95)
 
 ```go
 const (
